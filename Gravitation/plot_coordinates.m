@@ -2,6 +2,7 @@ clear;
 data = importdata('output.dat');
 Nt = size(data,1);
 Nb = (size(data,2) -1)/6;
+Nt = 3650;
 
 figure(1);
 hold on;
