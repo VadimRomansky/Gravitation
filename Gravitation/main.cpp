@@ -10,8 +10,7 @@ const double G = 6.674E-8;
 const double Msun = 1.9885E33;
 const double AU = 14959787070000;
 const double Vfirst = sqrt(G*Msun/AU);
-const int Niterations = 1000000;
-const double pi = 4*atan(1.0);
+const int Niterations = 60*876000;
 
 void output(FILE* outFile, double& time, double** coordinate, double** velocity){
 	fprintf(outFile, "%15.10g", time);
@@ -325,7 +324,7 @@ void initSolarSystem(double** coordinate, double** velocity, double* const mass)
 int main()
 {
 	double dt = 0.0001*AU/Vfirst;
-	dt = 2*3600;
+	dt = 60;
 	double time = 0;
 
 	double** coordinate;
@@ -406,14 +405,38 @@ int main()
 	output(outFile, time, coordinate, velocity);
 	fclose(outFile);
 
+	FILE* mercFile = fopen("mercury.dat","w");
+	fclose(mercFile);
+
+	double mercPrevR = 0;
+	double mercPrevPrevR = -1;
+
+	double mercX0 = coordinate[1][0] - coordinate[0][0];
+	double mercY0 = coordinate[1][1] - coordinate[0][1];
+	double mercZ0 = coordinate[1][2] - coordinate[0][2];
+
 	for(int k = 0; k < Niterations; ++k){
 		printf("iteration numer %d\n", k);
 		time += dt;
 
 		//eulerIteration(dt, coordinate, velocity, mass, tempCoordinate, tempVelocity);
+		double mercX = coordinate[1][0] - coordinate[0][0];
+		double mercY = coordinate[1][1] - coordinate[0][1];
+		double mercZ = coordinate[1][2] - coordinate[0][2];
 		explicitRungeKuttaIteration(dt, coordinate, velocity, mass, tempCoordinate, tempVelocity, rightPart);
 
-		if(k%12 == 0){
+		double mercR = sqrt(sqr(coordinate[0][0] - coordinate[1][0]) + sqr(coordinate[0][1]- coordinate[1][1]) + sqr(coordinate[0][2] - coordinate[1][2]));
+		if((mercPrevR < mercPrevPrevR) && (mercPrevR < mercR)){
+			double theta = evaluateAngle(mercX0, mercY0, mercZ0, coordinate[1][0] - coordinate[0][0], coordinate[1][1] - coordinate[0][1], coordinate[1][2] - coordinate[0][2]);
+			mercFile = fopen("mercury.dat","a");
+			fprintf(mercFile,"%15.10g %15.10g %15.10g %15.10g %15.10g\n", time-dt, mercX, mercY, mercZ, theta);
+			fclose(mercFile);
+		}
+
+		mercPrevPrevR = mercPrevR;
+		mercPrevR = mercR;
+
+		if(k%(12*60) == 0){
 			outFile = fopen("output.dat", "a");
 			output(outFile, time, coordinate, velocity);
 			fclose(outFile);

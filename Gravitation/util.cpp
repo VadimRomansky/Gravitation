@@ -53,6 +53,27 @@ double min4(const double& a, const double& b, const double& c, const double& d){
 	}
 }
 
+double evaluateAngle(const double& ax, const double& ay, const double& az, const double& bx, const double& by, const double& bz){
+	double a = sqrt(ax*ax + ay*ay + az*az);
+	double b = sqrt(bx*bx + by*by + bz*bz);
+
+	double scalar = ax*bx + ay*by + az*bz;
+	double cosab = scalar/(a*b);
+
+	double cx = ay*bz - az*by;
+	double cy = az*bx - ax*bz;
+	double cz = ax*by - ay*bx;
+
+	if(cz > 0){
+		return 180*acos(cosab)/pi;
+	} else {
+		return -180*acos(cosab)/pi;
+	}
+
+	/*double c = sqrt(cx*cx + cy*cy + cz*cz);
+	double sinab = c/(a*b);*/
+}
+
 double max(const double& a, const double& b){
 	if(a > b) {
 		return a;
